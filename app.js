@@ -47,19 +47,19 @@ const dict = {
         shTitle: "📊 Trip summary", shTrans: "💸 Who transfers to whom:", shPerf: "Perfect balance! Nobody owes anything 😎", shBot: "Calculated in CheckMate ♟️",
         btnCreating: "Creating...", btnSaving: "Saving..."
     },
-    cs: {
-        sub1: "Ideální rovnováha", btnNewTrip: "Nová cesta", histTitle: "Moje cesty:",
-        title2: "Nová skupina", sub2: "Detaily cesty", plcGroup: "Název (např. Dublin)",
-        lblCur: "V jaké měně počítáme?", btnCont: "Pokračovat",
-        title3: "Kdo jede?", sub3: "Přidejte jména účastníků", plcFriend: "Jméno kamaráda", btnExp: "K výdajům",
-        title4: "Naše cesta", lblTotal: "Celkové výdaje:", emptyCheck: "Zatím žádný účet. Jste skvělí!",
-        btnAddExp: "+ Přidat účet", btnWhoOwes: "Kdo komu dluží?",
-        title5: "Ideální rovnováha", sub5: "Kdo komu posílá", btnBack: "← Zpět k účtům", btnShare: "Sdílet v chatu",
-        modTitle: "Nový výdaj", plcExp: "Za co platíme? (jídlo, taxi)", plcSum: "Částka", lblPayer: "Kdo platil?", btnCancel: "Zrušit", btnAdd: "Přidat",
-        paidBy: "Platil(a):", errShort: "Název je příliš krátký!", errTwo: "Přidejte alespoň dva účastníky!",
-        errSum: "Zadejte správný název a částku!", errOne: "Nejprve přidejte alespoň jeden účet!", delConfirm: "Opravdu smazat tento výdaj?",
-        shTitle: "📊 Shrnutí cesty", shTrans: "💸 Kdo komu posílá:", shPerf: "Ideální rovnováha! Nikdo nikomu nic nedluží 😎", shBot: "Spočítáno v CheckMate ♟️",
-        btnCreating: "Vytváříme...", btnSaving: "Ukládáme..."
+    de: {
+        sub1: "Perfekte Balance", btnNewTrip: "Neue Reise", histTitle: "Meine Reisen:",
+        title2: "Neue Gruppe", sub2: "Reisedetails", plcGroup: "Name (z.B. Dublin)",
+        lblCur: "In welcher Währung?", btnCont: "Weiter",
+        title3: "Wer ist dabei?", sub3: "Teilnehmer hinzufügen", plcFriend: "Name des Freundes", btnExp: "Zu den Ausgaben",
+        title4: "Unsere Reise", lblTotal: "Gesamtausgaben:", emptyCheck: "Noch keine Belege. Ihr seid großartig!",
+        btnAddExp: "+ Beleg hinzufügen", btnWhoOwes: "Wer schuldet wem?",
+        title5: "Perfekte Balance", sub5: "Wer überweist wem", btnBack: "← Zurück zu Belegen", btnShare: "Im Chat teilen",
+        modTitle: "Neue Ausgabe", plcExp: "Wofür? (Essen, Taxi)", plcSum: "Betrag", lblPayer: "Wer hat bezahlt?", btnCancel: "Abbrechen", btnAdd: "Hinzufügen",
+        paidBy: "Bezahlt von:", errShort: "Name ist zu kurz!", errTwo: "Füge mindestens 2 Teilnehmer hinzu!",
+        errSum: "Gib einen gültigen Namen und Betrag ein!", errOne: "Füge zuerst mindestens einen Beleg hinzu!", delConfirm: "Diese Ausgabe wirklich löschen?",
+        shTitle: "📊 Reisezusammenfassung", shTrans: "💸 Wer überweist wem:", shPerf: "Perfekte Balance! Niemand schuldet etwas 😎", shBot: "Berechnet in CheckMate ♟️",
+        btnCreating: "Wird erstellt...", btnSaving: "Wird gespeichert..."
     }
 };
 

@@ -1,0 +1,369 @@
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: radial-gradient(circle at 50% 50%, #2A2A2D 0%, #121212 100%);
+    color: #F2F2F7;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    height: 100vh;
+    overflow: hidden;
+    /* Убрали relative, так как псевдоэлементы больше не нужны */
+}
+
+
+
+.app-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+}
+
+.logo {
+    font-size: 3.5rem;
+    letter-spacing: -1px; 
+    font-weight: 800;
+    background: linear-gradient(135deg, #ffffff 0%, #8e8e93 100%);
+    -webkit-background-clip: text;
+    background-clip: text; /* <-- ДОБАВЬ ВОТ ЭТУ СТРОЧКУ */
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 5px;
+}
+
+.subtitle {
+    color: #8e8e93; /* Благородный серый цвет, как в iOS */
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+/* --- Стеклянная кнопка --- */
+.glass-btn {
+    margin-top: 40px;
+    padding: 16px 40px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.05); /* Полупрозрачный белый */
+    border: 1px solid rgba(255, 255, 255, 0.1); /* Тонкая светлая рамка */
+    border-radius: 20px; /* Мягкие углы, как в iOS */
+    backdrop-filter: blur(12px); /* Эффект размытия фона под кнопкой */
+    -webkit-backdrop-filter: blur(12px); /* Для поддержки Safari/iOS */
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2); /* Легкая тень для объема */
+}
+
+/* Анимация при наведении (кнопка слегка светится и приподнимается) */
+.glass-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+/* Анимация при нажатии (кнопка прожимается) */
+.glass-btn:active {
+    transform: translateY(1px);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+/* --- Вспомогательные классы и Экран 2 --- */
+.hidden {
+    display: none !important;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: #ffffff;
+}
+
+.glass-input {
+    margin-top: 30px;
+    width: 85%;
+    max-width: 300px;
+    padding: 16px 20px;
+    font-size: 1.1rem;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    outline: none;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+/* Эффект свечения при вводе текста */
+.glass-input:focus {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+}
+
+.glass-input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.input-group {
+    display: flex;
+    gap: 10px;
+    width: 85%;
+    max-width: 350px;
+    margin-top: 20px;
+}
+
+.add-member-btn {
+    padding: 0 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.members-list {
+    margin-top: 20px;
+    width: 85%;
+    max-height: 200px;
+    overflow-y: auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+}
+
+.member-chip {
+    background: rgba(255, 255, 255, 0.08);
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 0.9rem;
+}
+
+/* --- Экран 4: Дашборд --- */
+.dashboard-header {
+    width: 100%;
+    margin-bottom: 20px;
+    padding-top: 20px;
+}
+
+#total-expense {
+    color: #fff;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.expenses-list {
+    flex-grow: 1;
+    width: 90%;
+    max-width: 400px;
+    max-height: 50vh; /* <-- Ограничиваем высоту (половина экрана) */
+    overflow-y: auto; /* <-- Включаем внутренний скролл */
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 15px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.empty-state {
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 0.9rem;
+    margin: auto;
+}
+
+.action-btn {
+    width: 90%;
+    max-width: 400px;
+    margin-top: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.secondary-btn {
+    width: 90%;
+    max-width: 400px;
+    margin-top: 10px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.9rem;
+}
+
+/* --- Всплывающее окно (Модалка) --- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+    display: flex !important; /* Переопределяем обычный hidden для плавной анимации */
+}
+
+.modal-content {
+    width: 90%;
+    max-width: 350px;
+    background: rgba(42, 42, 45, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 25px;
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    transform: translateY(0);
+    transition: transform 0.3s ease;
+}
+
+.modal-overlay.hidden .modal-content {
+    transform: translateY(50px);
+}
+
+.select-wrapper {
+    width: 100%;
+    margin-top: 15px;
+    text-align: left;
+}
+
+/* Стилизация опций внутри селекта для темной темы */
+option {
+    background-color: #2A2A2D;
+    color: white;
+}
+
+/* --- Карточка отдельного чека в списке --- */
+.expense-item {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 12px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    animation: fadeIn 0.3s ease; /* Плавное появление */
+}
+
+.expense-info {
+    text-align: left;
+}
+
+.expense-title {
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.expense-payer {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.8rem;
+    margin-top: 3px;
+}
+
+.expense-amount {
+    color: #ffffff;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Экран 5: Карточки долгов --- */
+.debt-item {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    animation: fadeIn 0.4s ease;
+}
+
+.debt-names {
+    font-size: 1rem;
+    color: #ffffff;
+    text-align: left;
+}
+
+.debt-amount {
+    color: #4cd964; /* Приятный зеленый цвет для переводов */
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.arrow {
+    color: rgba(255, 255, 255, 0.3);
+    margin: 0 5px;
+}
+
+/* --- Кнопка удаления чека --- */
+.delete-btn {
+    background: rgba(255, 59, 48, 0.15); /* Красный оттенок iOS */
+    color: #ff3b30;
+    border: none;
+    border-radius: 8px;
+    width: 28px;
+    height: 28px;
+    font-size: 1.2rem;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.delete-btn:active {
+    transform: scale(0.9);
+    background: rgba(255, 59, 48, 0.3);
+}
+
+/* --- Карточки истории на первом экране --- */
+.history-item {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 15px;
+    padding: 16px;
+    color: white;
+    font-weight: 600;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.history-item:active {
+    transform: scale(0.98);
+    background: rgba(255, 255, 255, 0.1);
+}

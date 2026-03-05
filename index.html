@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CheckMate</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div style="position: absolute; top: 15px; right: 15px; z-index: 1000;">
+        <select id="lang-select" class="glass-input" style="margin-top: 0; padding: 5px 10px; font-size: 0.9rem; width: auto; border-radius: 10px; cursor: pointer;">
+            <option value="ru">🇷🇺 RU</option>
+            <option value="uk">🇺🇦 UK</option>
+            <option value="en">🇬🇧 EN</option>
+            <option value="cs">🇨🇿 CS</option>
+        </select>
+    </div>
+
+    <div class="app-container" id="screen-1">
+        <h1 class="logo">CheckMate</h1>
+        <p class="subtitle" data-i18n="sub1">Идеальный баланс</p>
+        <button class="glass-btn" id="new-trip-btn" data-i18n="btnNewTrip">Новая поездка</button>
+
+        <div id="history-section" class="hidden" style="width: 90%; max-width: 400px; margin-top: 40px;">
+            <p class="subtitle" style="margin-bottom: 15px;" data-i18n="histTitle">Мои поездки:</p>
+            <div id="history-list" style="display: flex; flex-direction: column; gap: 10px; max-height: 35vh; overflow-y: auto;">
+            </div>
+        </div>
+    </div>
+
+    <div class="app-container hidden" id="screen-2">
+        <h2 class="title" data-i18n="title2">Новая группа</h2>
+        <p class="subtitle" data-i18n="sub2">Детали поездки</p>
+        <input type="text" id="group-name" class="glass-input" data-i18n-placeholder="plcGroup" placeholder="Название (напр. Дублин)">
+        
+        <div class="select-wrapper" style="width: 85%; max-width: 300px; text-align: center;">
+            <p style="margin-top: 15px; margin-bottom: 5px; color: rgba(255,255,255,0.7); font-size: 0.9rem;" data-i18n="lblCur">В какой валюте считаем?</p>
+            <select id="group-currency" class="glass-input" style="width: 100%; margin-top: 0; text-align: center;">
+                <option value="€">Евро (€)</option>
+                <option value="Kč">Чешская крона (Kč)</option>
+                <option value="₴">Гривна (₴)</option>
+                <option value="$">Доллар ($)</option>
+            </select>
+        </div>
+        <button class="glass-btn" id="create-group-btn" data-i18n="btnCont">Продолжить</button>
+    </div>
+
+    <div class="app-container hidden" id="screen-3">
+        <h2 class="title" data-i18n="title3">Кто в деле?</h2>
+        <p class="subtitle" data-i18n="sub3">Добавь имена участников</p>
+        
+        <div class="input-group">
+            <input type="text" id="member-name" class="glass-input" data-i18n-placeholder="plcFriend" placeholder="Имя друга">
+            <button class="add-member-btn" id="add-member-btn">+</button>
+        </div>
+        <div id="members-list" class="members-list"></div>
+        <button class="glass-btn" id="start-app-btn" data-i18n="btnExp">К расходам</button>
+    </div>
+
+    <div class="app-container hidden" id="screen-4">
+        <div class="dashboard-header">
+            <h2 class="title" id="dashboard-group-name">Наша поездка</h2>
+            <p class="subtitle"><span data-i18n="lblTotal">Общий расход:</span> <span id="total-expense">0</span> <span id="currency-symbol">€</span></p>
+        </div>
+
+        <div id="expenses-list" class="expenses-list">
+            <p class="empty-state" data-i18n="emptyCheck">Пока нет ни одного чека. Вы великолепны!</p>
+        </div>
+
+        <button class="glass-btn action-btn" id="add-expense-btn" data-i18n="btnAddExp">+ Добавить чек</button>
+        <button class="glass-btn secondary-btn" id="view-debts-btn" style="margin-bottom: 30px;" data-i18n="btnWhoOwes">Кто кому должен?</button>
+    </div>
+
+    <div class="app-container hidden" id="screen-5">
+        <div class="dashboard-header">
+            <h2 class="title" data-i18n="title5">Идеальный баланс</h2>
+            <p class="subtitle" data-i18n="sub5">Кто кому переводит</p>
+        </div>
+
+        <div id="debts-list" class="expenses-list"></div>
+
+        <button class="glass-btn action-btn" id="share-btn" style="margin-top: 10px;" data-i18n="btnShare">Поделиться в чате</button>
+        <button class="glass-btn secondary-btn" id="back-to-dashboard-btn" style="margin-top: 10px; margin-bottom: 30px;" data-i18n="btnBack">← Назад к чекам</button>
+    </div>
+
+    <div class="modal-overlay hidden" id="expense-modal">
+        <div class="modal-content">
+            <h3 class="title" style="font-size: 1.5rem;" data-i18n="modTitle">Новый расход</h3>
+            <input type="text" id="expense-title" class="glass-input" style="width: 100%; margin-top: 15px;" data-i18n-placeholder="plcExp" placeholder="На что скидываемся?">
+            <input type="number" id="expense-amount" class="glass-input" style="width: 100%; margin-top: 15px;" data-i18n-placeholder="plcSum" placeholder="Сумма">
+            
+            <div class="select-wrapper">
+                <p style="margin-bottom: 5px; color: rgba(255,255,255,0.7); font-size: 0.9rem;" data-i18n="lblPayer">Кто платил?</p>
+                <select id="payer-select" class="glass-input" style="width: 100%; margin-top: 0;"></select>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 20px; width: 100%;">
+                <button class="glass-btn secondary-btn" id="close-modal-btn" style="flex: 1; margin-top: 0;" data-i18n="btnCancel">Отмена</button>
+                <button class="glass-btn action-btn" id="save-expense-btn" style="flex: 1; margin-top: 0;" data-i18n="btnAdd">Добавить</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="app.js?v=4"></script>
+</body>
+</html>

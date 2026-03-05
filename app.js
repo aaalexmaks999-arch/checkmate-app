@@ -63,8 +63,8 @@ const dict = {
     }
 };
 
-let currentLang = localStorage.getItem('appLang') || 'ru'; // Читаем память телефона
-const t = (key) => dict[currentLang][key] || key; // Умный переводчик
+let currentLang = localStorage.getItem('appLang') || 'ru'; 
+const t = (key) => dict[currentLang][key] || key; 
 
 function applyTranslations() {
     document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -73,7 +73,6 @@ function applyTranslations() {
     document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
         el.placeholder = t(el.getAttribute('data-i18n-placeholder'));
     });
-    // Перерисовываем пустой экран чеков, если он есть
     const emptyState = document.querySelector('.empty-state');
     if (emptyState && totalAmount === 0) emptyState.innerText = t('emptyCheck');
 }
@@ -82,7 +81,7 @@ const langSelect = document.getElementById('lang-select');
 langSelect.value = currentLang;
 langSelect.addEventListener('change', (e) => {
     currentLang = e.target.value;
-    localStorage.setItem('appLang', currentLang); // Запоминаем выбор
+    localStorage.setItem('appLang', currentLang); 
     applyTranslations();
 });
 
@@ -104,7 +103,6 @@ const tg = window.Telegram.WebApp;
 
 tg.expand();
 tg.ready();
-applyTranslations(); // Переводим всё на старте!
 
 // ==========================================
 // 2. ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
@@ -115,6 +113,9 @@ let currentGroupName = "";
 let currentCurrency = "€"; 
 let totalAmount = 0;
 let paidAmounts = {}; 
+
+// ВОТ ЗДЕСЬ И БЫЛА ОШИБКА! Теперь мы вызываем перевод ТОЛЬКО ПОСЛЕ того, как создали переменные!
+applyTranslations(); 
 
 // ПОИСК ЭЛЕМЕНТОВ
 const screen1 = document.getElementById('screen-1');

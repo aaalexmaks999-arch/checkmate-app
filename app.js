@@ -17,7 +17,8 @@ const dict = {
         paidBy: "Оплатил(а):", errShort: "Название слишком короткое!", errTwo: "Добавьте хотя бы двух участников!",
         errSum: "Введите корректное название и сумму!", errOne: "Сначала добавьте хотя бы один чек!", delConfirm: "Точно удалить этот расход?",
         shTitle: "📊 Итоги поездки", shTrans: "💸 Кто кому переводит:", shPerf: "Идеальный баланс! Никто никому ничего не должен 😎", shBot: "Считали в CheckMate ♟️",
-        btnCreating: "Создаем...", btnSaving: "Сохраняем..."
+        btnCreating: "Создаем...", btnSaving: "Сохраняем...",
+        lblForWhom: "Для кого этот расход?"
     },
     uk: {
         sub1: "Ідеальний баланс", btnNewTrip: "Нова поїздка", histTitle: "Мої поїздки:",
@@ -31,7 +32,8 @@ const dict = {
         paidBy: "Оплатив(ла):", errShort: "Назва надто коротка!", errTwo: "Додайте хоча б двох учасників!",
         errSum: "Введіть коректну назву та суму!", errOne: "Спочатку додайте хоча б один чек!", delConfirm: "Точно видалити цю витрату?",
         shTitle: "📊 Підсумки поїздки", shTrans: "💸 Хто кому переказує:", shPerf: "Ідеальний баланс! Ніхто нікому нічого не винен 😎", shBot: "Рахували в CheckMate ♟️",
-        btnCreating: "Створюємо...", btnSaving: "Зберігаємо..."
+        btnCreating: "Створюємо...", btnSaving: "Зберігаємо...",
+        lblForWhom: "Для кого ця витрата?"
     },
     en: {
         sub1: "Perfect balance", btnNewTrip: "New trip", histTitle: "My trips:",
@@ -45,7 +47,8 @@ const dict = {
         paidBy: "Paid by:", errShort: "Name is too short!", errTwo: "Add at least two participants!",
         errSum: "Enter a valid name and amount!", errOne: "Add at least one receipt first!", delConfirm: "Delete this expense?",
         shTitle: "📊 Trip summary", shTrans: "💸 Who transfers to whom:", shPerf: "Perfect balance! Nobody owes anything 😎", shBot: "Calculated in CheckMate ♟️",
-        btnCreating: "Creating...", btnSaving: "Saving..."
+        btnCreating: "Creating...", btnSaving: "Saving...",
+        lblForWhom: "For whom is this expense?"
     },
     de: {
         sub1: "Perfekte Balance", btnNewTrip: "Neue Reise", histTitle: "Meine Reisen:",
@@ -59,7 +62,8 @@ const dict = {
         paidBy: "Bezahlt von:", errShort: "Name ist zu kurz!", errTwo: "Füge mindestens 2 Teilnehmer hinzu!",
         errSum: "Gib einen gültigen Namen und Betrag ein!", errOne: "Füge zuerst mindestens einen Beleg hinzu!", delConfirm: "Diese Ausgabe wirklich löschen?",
         shTitle: "📊 Reisezusammenfassung", shTrans: "💸 Wer überweist wem:", shPerf: "Perfekte Balance! Niemand schuldet etwas 😎", shBot: "Berechnet in CheckMate ♟️",
-        btnCreating: "Wird erstellt...", btnSaving: "Wird gespeichert..."
+        btnCreating: "Wird erstellt...", btnSaving: "Wird gespeichert...",
+        lblForWhom: "Für wen ist diese Ausgabe?"
     }
 };
 
@@ -218,9 +222,10 @@ async function loadGroupData(groupId, groupData) {
                         <div class="expense-payer">${t('paidBy')} ${payer}</div>
                         <div style="font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-top: 2px;">${forWhomText}</div>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <div class="expense-amount">${amount} ${currentCurrency}</div>
-                        <button class="delete-btn" data-id="${expDoc.id}" data-amount="${amount}" data-payer="${payer}" data-involved='${JSON.stringify(involved)}'>×</button>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div class="expense-amount" style="margin-right: 5px;">${amount} ${currentCurrency}</div>
+                        <button class="edit-btn" data-id="${expDoc.id}" data-amount="${amount}" data-title="${expData.title}" data-payer="${payer}" data-involved='${JSON.stringify(involved)}'>✎</button>
+                        <button class="delete-btn" data-id="${expDoc.id}">×</button>
                     </div>
                 `;
                 expensesList.appendChild(expenseItem);

@@ -112,7 +112,9 @@ let currentGroupId = null;
 let currentGroupName = "";
 let currentCurrency = "€"; 
 let totalAmount = 0;
-let paidAmounts = {}; 
+let editingExpenseId = null; // ID чека, который редактируем
+let balances = {}; // Новая система: { "Иван": 15.5, "Олег": -15.5 }
+
 
 // ВОТ ЗДЕСЬ И БЫЛА ОШИБКА! Теперь мы вызываем перевод ТОЛЬКО ПОСЛЕ того, как создали переменные!
 applyTranslations(); 
@@ -171,8 +173,12 @@ async function loadGroupData(groupId, groupData) {
     currentGroupName = groupData.title;
     currentCurrency = groupData.currency || "€"; 
     members = groupData.members || [];
+    
+    // СБРОС ДАННЫХ ПЕРЕД ЗАГРУЗКОЙ НОВОЙ ГРУППЫ
     totalAmount = 0;
-    paidAmounts = {};
+    balances = {}; // ИСПОЛЬЗУЕМ БАЛАНСЫ ВМЕСТО paidAmounts
+    members.forEach(m => balances[m] = 0); // Обнуляем балансы всех участников
+    
     expensesList.innerHTML = ''; 
 
     try {
@@ -184,10 +190,25 @@ async function loadGroupData(groupId, groupData) {
                 const expData = expDoc.data();
                 const amount = expData.amount;
                 const payer = expData.payer;
+                
+                // Читаем участников чека (если старый чек, считаем что скидывались все)
+                const involved = expData.involved || members; 
 
                 totalAmount += amount;
-                if (!paidAmounts[payer]) paidAmounts[payer] = 0;
-                paidAmounts[payer] += amount;
+                
+                // СЧИТАЕМ БАЛАНСЫ
+                if (balances[payer] === undefined) balances[payer] = 0;
+                balances[payer] += amount; // Плательщику плюсуем сумму
+
+                const splitAmount = amount / involved.length; 
+                involved.forEach(person => {
+                    if (balances[person] !== undefined) {
+                        balances[person] -= splitAmount; // Тем за кого платили - минусуем
+                    }
+                });
+
+                // Формируем текст "Для кого"
+                let forWhomText = involved.length === members.length ? "Для всех" : `Для: ${involved.join(', ')}`;
 
                 const expenseItem = document.createElement('div');
                 expenseItem.className = 'expense-item';
@@ -195,22 +216,29 @@ async function loadGroupData(groupId, groupData) {
                     <div class="expense-info">
                         <div class="expense-title">${expData.title}</div>
                         <div class="expense-payer">${t('paidBy')} ${payer}</div>
+                        <div style="font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-top: 2px;">${forWhomText}</div>
                     </div>
                     <div style="display: flex; align-items: center; gap: 12px;">
                         <div class="expense-amount">${amount} ${currentCurrency}</div>
-                        <button class="delete-btn" data-id="${expDoc.id}" data-amount="${amount}" data-payer="${payer}">×</button>
+                        <button class="delete-btn" data-id="${expDoc.id}" data-amount="${amount}" data-payer="${payer}" data-involved='${JSON.stringify(involved)}'>×</button>
                     </div>
                 `;
                 expensesList.appendChild(expenseItem);
             });
         }
+        
         dashboardGroupName.innerText = currentGroupName;
         totalExpenseEl.innerText = totalAmount;
         currencySymbolEl.innerText = currentCurrency; 
+        
         screen1.classList.add('hidden');
         screen4.classList.remove('hidden');
-    } catch (e) {}
+    } catch (e) {
+        // Раньше тут было пусто catch(e) {}, теперь выводим ошибку в консоль
+        console.error("Ошибка загрузки чеков:", e); 
+    }
 }
+
 loadHistory();
 
 // ЛОГИКА ЭКРАНОВ
@@ -272,10 +300,40 @@ const totalExpenseEl = document.getElementById('total-expense');
 addExpenseBtn.addEventListener('click', () => {
     tg.HapticFeedback.impactOccurred('light');
     payerSelect.innerHTML = '';
+    
+    const participantsContainer = document.getElementById('participants-checkboxes');
+    participantsContainer.innerHTML = '';
+
     members.forEach(member => {
-        const option = document.createElement('option'); option.value = member; option.innerText = member;
+        // Заполняем селект "Кто платил"
+        const option = document.createElement('option'); 
+        option.value = member; 
+        option.innerText = member;
         payerSelect.appendChild(option);
+
+        // Генерируем чекбоксы "За кого"
+        const label = document.createElement('label');
+        label.style.display = 'flex';
+        label.style.alignItems = 'center';
+        label.style.gap = '10px';
+        label.style.color = '#fff';
+        label.style.cursor = 'pointer';
+        label.style.fontSize = '1rem';
+        
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.value = member;
+        checkbox.checked = true; // По умолчанию скидываются все
+        checkbox.className = 'participant-cb';
+        checkbox.style.width = '18px';
+        checkbox.style.height = '18px';
+        checkbox.style.accentColor = '#4cd964'; // Цвет галочки
+        
+        label.appendChild(checkbox);
+        label.appendChild(document.createTextNode(member));
+        participantsContainer.appendChild(label);
     });
+    
     modalOverlay.classList.remove('hidden');
 });
 
@@ -289,68 +347,113 @@ saveExpenseBtn.addEventListener('click', async () => {
     const amount = parseFloat(document.getElementById('expense-amount').value);
     const payer = payerSelect.value;
 
+    // СОБИРАЕМ ОТМЕЧЕННЫХ УЧАСТНИКОВ
+    const checkboxes = document.querySelectorAll('.participant-cb:checked');
+    const involved = Array.from(checkboxes).map(cb => cb.value);
+
+    if (involved.length === 0) { 
+        tg.showAlert("Выберите хотя бы одного участника!"); 
+        return; 
+    }
     if (!title || isNaN(amount) || amount <= 0) { tg.showAlert(t('errSum')); return; }
+
     try {
         saveExpenseBtn.disabled = true; saveExpenseBtn.innerText = t('btnSaving');
         tg.HapticFeedback.impactOccurred('medium');
 
-        const docRef = await addDoc(collection(db, "groups", currentGroupId, "expenses"), {
-            title: title, amount: amount, payer: payer, created_at: serverTimestamp()
-        });
-
-        totalAmount += amount;
-        if (!paidAmounts[payer]) paidAmounts[payer] = 0;
-        paidAmounts[payer] += amount;
-        totalExpenseEl.innerText = totalAmount;
-
-        const emptyState = document.querySelector('.empty-state');
-        if (emptyState) emptyState.remove();
-
-        const expenseItem = document.createElement('div');
-        expenseItem.className = 'expense-item';
-        expenseItem.innerHTML = `
-            <div class="expense-info">
-                <div class="expense-title">${title}</div>
-                <div class="expense-payer">${t('paidBy')} ${payer}</div>
-            </div>
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <div class="expense-amount">${amount} ${currentCurrency}</div>
-                <button class="delete-btn" data-id="${docRef.id}" data-amount="${amount}" data-payer="${payer}">×</button>
-            </div>
-        `;
-        expensesList.appendChild(expenseItem);
+        if (editingExpenseId) {
+            // ЕСЛИ РЕДАКТИРУЕМ СТАРЫЙ ЧЕК
+            await updateDoc(doc(db, "groups", currentGroupId, "expenses", editingExpenseId), {
+                title: title, amount: amount, payer: payer, involved: involved
+            });
+            editingExpenseId = null; // Сбрасываем режим редактирования после сохранения
+        } else {
+            // ЕСЛИ СОЗДАЕМ НОВЫЙ ЧЕК
+            await addDoc(collection(db, "groups", currentGroupId, "expenses"), {
+                title: title, amount: amount, payer: payer, involved: involved, created_at: serverTimestamp()
+            });
+        }
 
         modalOverlay.classList.add('hidden');
         document.getElementById('expense-title').value = ''; document.getElementById('expense-amount').value = '';
         saveExpenseBtn.disabled = false; saveExpenseBtn.innerText = t('btnAdd');
+
+        // 🔥 ВМЕСТО РУЧНОЙ ОТРИСОВКИ ПРОСТО ОБНОВЛЯЕМ ВЕСЬ СПИСОК ИЗ БАЗЫ
+        loadGroupData(currentGroupId, {title: currentGroupName, currency: currentCurrency, members: members});
+        
     } catch (e) {
         saveExpenseBtn.disabled = false; saveExpenseBtn.innerText = t('btnAdd');
+        console.error(e);
     }
 });
 
-// УДАЛЕНИЕ ЧЕКА
+// ОБРАБОТКА КЛИКОВ ПО КАРТОЧКЕ ЧЕКА (РЕДАКТИРОВАНИЕ И УДАЛЕНИЕ)
 expensesList.addEventListener('click', async (e) => {
-    const btn = e.target.closest('.delete-btn');
-    if (!btn) return; 
+    // 1. ЕСЛИ НАЖАЛИ УДАЛИТЬ
+    const deleteBtn = e.target.closest('.delete-btn');
+    if (deleteBtn) {
+        const id = deleteBtn.getAttribute('data-id');
+        const performDelete = async () => {
+            try {
+                await deleteDoc(doc(db, "groups", currentGroupId, "expenses", id));
+                if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+                // Перезагружаем данные группы, чтобы балансы пересчитались идеально точно
+                loadGroupData(currentGroupId, {title: currentGroupName, currency: currentCurrency, members: members});
+            } catch (error) { console.error(error); }
+        };
 
-    const id = btn.getAttribute('data-id');
-    const amount = parseFloat(btn.getAttribute('data-amount'));
-    const payer = btn.getAttribute('data-payer');
+        if (tg.initDataUnsafe && Object.keys(tg.initDataUnsafe).length > 0) {
+            tg.showConfirm(t('delConfirm'), (confirmed) => { if (confirmed) performDelete(); });
+        } else {
+            if (window.confirm(t('delConfirm'))) performDelete();
+        }
+        return;
+    }
 
-    const performDelete = async () => {
-        try {
-            await deleteDoc(doc(db, "groups", currentGroupId, "expenses", id));
-            totalAmount -= amount; totalExpenseEl.innerText = totalAmount;
-            if (paidAmounts[payer]) paidAmounts[payer] -= amount;
-            btn.closest('.expense-item').remove();
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-        } catch (error) {}
-    };
+    // 2. ЕСЛИ НАЖАЛИ РЕДАКТИРОВАТЬ
+    const editBtn = e.target.closest('.edit-btn');
+    if (editBtn) {
+        tg.HapticFeedback.impactOccurred('light');
+        
+        editingExpenseId = editBtn.getAttribute('data-id');
+        const title = editBtn.getAttribute('data-title');
+        const amount = editBtn.getAttribute('data-amount');
+        const payer = editBtn.getAttribute('data-payer');
+        const involved = JSON.parse(editBtn.getAttribute('data-involved'));
 
-    if (tg.initDataUnsafe && Object.keys(tg.initDataUnsafe).length > 0) {
-        tg.showConfirm(t('delConfirm'), (confirmed) => { if (confirmed) performDelete(); });
-    } else {
-        if (window.confirm(t('delConfirm'))) performDelete();
+        // Заполняем модалку старыми данными
+        document.getElementById('expense-title').value = title;
+        document.getElementById('expense-amount').value = amount;
+        
+        // Перерисовываем селекты и чекбоксы
+        payerSelect.innerHTML = '';
+        const participantsContainer = document.getElementById('participants-checkboxes');
+        participantsContainer.innerHTML = '';
+
+        members.forEach(member => {
+            // Селект "Кто платил"
+            const option = document.createElement('option'); 
+            option.value = member; option.innerText = member;
+            if (member === payer) option.selected = true;
+            payerSelect.appendChild(option);
+
+            // Чекбоксы "За кого"
+            const label = document.createElement('label');
+            label.style.display = 'flex'; label.style.alignItems = 'center'; label.style.gap = '10px'; label.style.color = '#fff'; label.style.cursor = 'pointer'; label.style.fontSize = '1rem';
+            
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox'; checkbox.value = member; checkbox.className = 'participant-cb';
+            checkbox.style.width = '18px'; checkbox.style.height = '18px'; checkbox.style.accentColor = '#4cd964';
+            
+            // Ставим галочку только тем, кто был в чеке
+            if (involved.includes(member)) checkbox.checked = true;
+            
+            label.appendChild(checkbox); label.appendChild(document.createTextNode(member));
+            participantsContainer.appendChild(label);
+        });
+
+        document.getElementById('save-expense-btn').innerText = "Сохранить"; // Меняем текст кнопки
+        modalOverlay.classList.remove('hidden');
     }
 });
 
@@ -369,17 +472,25 @@ viewDebtsBtn.addEventListener('click', () => {
     if (totalAmount === 0) { tg.showAlert(t('errOne')); return; }
     tg.HapticFeedback.impactOccurred('medium');
     
-    const share = totalAmount / members.length;
-    let debtors = []; let creditors = []; 
+    let debtors = []; 
+    let creditors = []; 
 
-    members.forEach(member => {
-        const paid = paidAmounts[member] || 0;
-        const balance = paid - share;
-        if (balance < -0.01) debtors.push({ name: member, amount: Math.abs(balance) });
-        else if (balance > 0.01) creditors.push({ name: member, amount: balance });
-    });
+    // НОВАЯ ЛОГИКА: Общей доли (share) больше нет. 
+    // Мы просто берем готовые балансы каждого участника.
+    for (const [member, balance] of Object.entries(balances)) {
+        if (balance < -0.01) {
+            // Если баланс отрицательный, человек ушел в минус (он должен денег)
+            debtors.push({ name: member, amount: Math.abs(balance) });
+        } else if (balance > 0.01) {
+            // Если баланс положительный, человек платил за других (ему должны вернуть)
+            creditors.push({ name: member, amount: balance });
+        }
+    }
 
-    debtors.sort((a, b) => b.amount - a.amount); creditors.sort((a, b) => b.amount - a.amount);
+    // Сортируем от больших долгов к меньшим, чтобы минимизировать количество переводов
+    debtors.sort((a, b) => b.amount - a.amount); 
+    creditors.sort((a, b) => b.amount - a.amount);
+    
     debtsList.innerHTML = ''; 
     
     currentShareText = `${t('shTitle')} "${currentGroupName}"\n${t('lblTotal')} ${totalAmount} ${currentCurrency}\n\n${t('shTrans')}\n`;

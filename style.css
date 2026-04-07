@@ -328,6 +328,28 @@ option {
     margin: 0 5px;
 }
 
+/* --- Кнопка редактирования чека --- */
+.edit-btn {
+    background: rgba(255, 255, 255, 0.15); 
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    width: 28px;
+    height: 28px;
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.edit-btn:active {
+    transform: scale(0.9);
+    background: rgba(255, 255, 255, 0.3);
+}
+
 /* --- Кнопка удаления чека --- */
 .delete-btn {
     background: rgba(255, 59, 48, 0.15); /* Красный оттенок iOS */
